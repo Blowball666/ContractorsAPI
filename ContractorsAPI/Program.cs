@@ -1,6 +1,8 @@
 using ContractorsAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
+using static ContractorsAPI.Controllers.ContractorsController;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,11 +20,13 @@ builder.Services.AddSwaggerGen(c =>
             Url = new Uri("https://opensource.org/licenses/MIT")
         }
     });
+    // Включение поддержки примеров данных
+    c.ExampleFilters();
 
     // Укажите путь к XML-файлу документации
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    c.IncludeXmlComments(xmlPath);
+    c.IncludeXmlComments(xmlPath);    
 
     // Группировка операций по тегам
     c.TagActionsBy(api => api.GroupName);
@@ -33,7 +37,8 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+// Добавление фильтров для примеров данных
+builder.Services.AddSwaggerExamplesFromAssemblyOf<ContractorExample>();
 var app = builder.Build();
 
 // Включаем Swagger
